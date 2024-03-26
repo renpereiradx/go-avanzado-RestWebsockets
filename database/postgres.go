@@ -29,7 +29,7 @@ func (p *PostgresRepository) InsertUser(ctx context.Context, user *models.User) 
 	return err
 }
 
-func (p *PostgresRepository) GetUserByID(ctx context.Context, id int64) (*models.User, error) {
+func (p *PostgresRepository) GetUserByID(ctx context.Context, id string) (*models.User, error) {
 	rows, err := p.db.QueryContext(ctx, "SELECT id, email, FROM users WHERE id = $1", id)
 	if err != nil {
 		return nil, err
@@ -47,7 +47,7 @@ func (p *PostgresRepository) GetUserByID(ctx context.Context, id int64) (*models
 		}
 	}
 	if err = rows.Err(); err != nil {
-		return nil, err	
+		return nil, err
 	}
 	return nil, nil
 }
