@@ -14,8 +14,8 @@ type UserRepository interface {
 
 var implementation UserRepository
 
-func SetUserRepository(user UserRepository) {
-	implementation = user
+func SetRepository(repository UserRepository) {
+	implementation = repository
 }
 
 func InsertUser(ctx context.Context, user *models.User) error {
