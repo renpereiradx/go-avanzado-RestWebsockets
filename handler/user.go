@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 
@@ -82,11 +83,12 @@ func LoginHandler(s server.Server) http.HandlerFunc {
 			return
 		}
 		if user == nil {
-			http.Error(w, "invalid credentials", http.StatusUnauthorized)
+			log.Println(err)
+			http.Error(w, "invalid credentials 1", http.StatusUnauthorized)
 			return
 		}
 		if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password)); err != nil {
-			http.Error(w, "invalid credentials", http.StatusUnauthorized)
+			http.Error(w, "invalid credentials 2", http.StatusUnauthorized)
 			return
 		}
 		claims := models.AppClaims{
