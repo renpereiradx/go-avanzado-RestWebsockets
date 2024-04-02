@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/renpereiradx/go-avanzado-RestWebsocket/helpers"
 	"github.com/renpereiradx/go-avanzado-RestWebsocket/models"
 	"github.com/renpereiradx/go-avanzado-RestWebsocket/repository"
 	"github.com/renpereiradx/go-avanzado-RestWebsocket/server"
@@ -107,5 +108,27 @@ func LoginHandler(s server.Server) http.HandlerFunc {
 		json.NewEncoder(w).Encode(LoginResponse{
 			Token: tokenString,
 		})
+	}
+}
+
+func MeHandler(s server.Server) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		token, err := helpers.GetJWTAuthorizationInfo(s, w, r)
+		if err != nil {
+			return
+		}
+		if claims, ok := token.Claims.(*models.AppClaims); ok && token.Valid {
+			user, err := repository.GetUserByID(r.Context(), claims.UserId)
+			if err != nil {
+				log.Println(err, "error getting user")
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(user)
+		} else {
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
 	}
 }

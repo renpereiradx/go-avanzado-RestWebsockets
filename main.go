@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"github.com/renpereiradx/go-avanzado-RestWebsocket/handler"
+	"github.com/renpereiradx/go-avanzado-RestWebsocket/middleware"
 	"github.com/renpereiradx/go-avanzado-RestWebsocket/server"
 )
 
@@ -34,7 +35,10 @@ func main() {
 }
 
 func BindRoutes(s server.Server, r *mux.Router) {
+	middleware.CheckAuthMiddleware(s)
+
 	r.HandleFunc("/", handler.HomeHandler(s)).Methods(http.MethodGet)
 	r.HandleFunc("/signup", handler.SignUpHandler(s)).Methods(http.MethodPost)
 	r.HandleFunc("/login", handler.LoginHandler(s)).Methods(http.MethodPost)
+	r.HandleFunc("/me", handler.MeHandler(s)).Methods(http.MethodGet)
 }

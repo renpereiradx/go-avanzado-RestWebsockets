@@ -4,8 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/renpereiradx/go-avanzado-RestWebsocket/models"
+	"github.com/renpereiradx/go-avanzado-RestWebsocket/helpers"
 	"github.com/renpereiradx/go-avanzado-RestWebsocket/server"
 )
 
@@ -38,19 +37,10 @@ func CheckAuthMiddleware(s server.Server) func(h http.Handler) http.Handler {
 				next.ServeHTTP(w, r)
 				return
 			}
-			// Del encabezado (Header) de la solicitud HTTP se OBTIENE el "Authorization" donde esta el Token y se le saca los espacios
-			tokenString := strings.TrimSpace(r.Header.Get("Authorization"))
-			// Analiza (Parsea) el tokenString con los claims que creamos en Models.
-			// Tambien realiza una funcion anonima donde retornara el JWTSecret del "s" (Server)
-			_, err := jwt.ParseWithClaims(tokenString, models.AppClaims{}, func(t *jwt.Token) (interface{}, error) {
-				return []byte(s.Config().JWTSecret), nil
-			})
-			// SI tiene error, el token esta mal y tira Unauthorized
+			_, err := helpers.GetJWTAuthorizationInfo(s, w, r)
 			if err != nil {
-				http.Error(w, err.Error(), http.StatusUnauthorized)
 				return
 			}
-			// Retorna el handler
 			next.ServeHTTP(w, r)
 		})
 	}
