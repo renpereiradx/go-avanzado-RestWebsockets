@@ -73,3 +73,31 @@ func (p *PostgresRepository) GetUserByEmail(ctx context.Context, email string) (
 	}
 	return nil, nil
 }
+
+func (p *PostgresRepository) InsertPost(ctx context.Context, posts *models.Posts) error {
+	_, err := p.db.ExecContext(ctx, "INSERT INTO posts (id, post_content, user_id) VALUES ($1, $2, $3)", posts.ID, posts.PostContent, posts.UserID)
+	return err
+}
+
+func (p *PostgresRepository) GetPostByID(ctx context.Context, id string) (*models.Posts, error) {
+	rows, err := p.db.QueryContext(ctx, "SELECT id, post_content, created_at, user_id FROM posts WHERE id = $1", id)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		err := rows.Close()
+		if err != nil {
+			log.Println("error closing rows", err)
+		}
+	}()
+	var post = models.Posts{}
+	for rows.Next() {
+		if err = rows.Scan(&post.ID, &post.PostContent, &post.CreatedAt, &post.UserID); err == nil {
+			return &post, nil
+		}
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return nil, nil
+}

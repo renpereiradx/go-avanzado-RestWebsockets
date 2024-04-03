@@ -6,16 +6,18 @@ import (
 	"github.com/renpereiradx/go-avanzado-RestWebsocket/models"
 )
 
-type UserRepository interface {
+type Repository interface {
 	InsertUser(ctx context.Context, user *models.User) error
 	GetUserByID(ctx context.Context, id string) (*models.User, error)
 	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
+	InsertPost(ctx context.Context, posts *models.Posts) error
+	GetPostByID(ctx context.Context, id string) (*models.Posts, error)
 	Close() error
 }
 
-var implementation UserRepository
+var implementation Repository
 
-func SetRepository(repository UserRepository) {
+func SetRepository(repository Repository) {
 	implementation = repository
 }
 
@@ -29,4 +31,12 @@ func GetUserByID(ctx context.Context, id string) (*models.User, error) {
 
 func GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
 	return implementation.GetUserByEmail(ctx, email)
+}
+
+func InsertPost(ctx context.Context, posts *models.Posts) error {
+	return implementation.InsertPost(ctx, posts)
+}
+
+func GetPostByID(ctx context.Context, id string) (*models.Posts, error) {
+	return implementation.GetPostByID(ctx, id)
 }
