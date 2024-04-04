@@ -101,3 +101,8 @@ func (p *PostgresRepository) GetPostByID(ctx context.Context, id string) (*model
 	}
 	return nil, nil
 }
+
+func (p *PostgresRepository) UpdatePost(ctx context.Context, post *models.Posts, userID string) error {
+	_, err := p.db.ExecContext(ctx, "UPDATE posts SET post_content = $1 WHERE id = $2 AND user_id = $3", post.PostContent, post.ID, userID)
+	return err
+}

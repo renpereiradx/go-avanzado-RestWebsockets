@@ -22,6 +22,14 @@ type PostResponse struct {
 	PostContent string `json:"post_content"`
 }
 
+type UpdatePostRequest struct {
+	PostContent string `json:"post_content"`
+}
+
+type UpdatePostResponse struct {
+	Message string `json:"message"`
+}
+
 func InsertPostHandler(s server.Server) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		token, err := helpers.GetJWTAuthorizationInfo(s, w, r)
@@ -73,5 +81,36 @@ func GetPostByIDHandler(s server.Server) http.HandlerFunc {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(post)
+	}
+}
+
+func UpdatePostHandler(s server.Server) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		params := mux.Vars(r)
+		token, err := helpers.GetJWTAuthorizationInfo(s, w, r)
+		if err != nil {
+			return
+		}
+		if claims, ok := token.Claims.(*models.AppClaims); ok && token.Valid {
+			var updatePostRequest = UpdatePostRequest{}
+			err := json.NewDecoder(r.Body).Decode(&updatePostRequest)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			post := models.Posts{
+				ID:          params["id"],
+				PostContent: updatePostRequest.PostContent,
+			}
+			err = repository.UpdatePost(r.Context(), &post, claims.UserId)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(UpdatePostResponse{
+				Message: "Post updated successfully",
+			})
+		}
 	}
 }
