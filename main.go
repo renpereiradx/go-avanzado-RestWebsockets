@@ -11,7 +11,6 @@ import (
 	"github.com/renpereiradx/go-avanzado-RestWebsocket/handler"
 	"github.com/renpereiradx/go-avanzado-RestWebsocket/middleware"
 	"github.com/renpereiradx/go-avanzado-RestWebsocket/server"
-	"github.com/renpereiradx/go-avanzado-RestWebsocket/websocket"
 )
 
 func main() {
@@ -36,7 +35,6 @@ func main() {
 }
 
 func BindRoutes(s server.Server, r *mux.Router) {
-	hub := websocket.NewHub()
 	middleware.CheckAuthMiddleware(s)
 
 	r.HandleFunc("/", handler.HomeHandler(s)).Methods(http.MethodGet)
@@ -48,6 +46,5 @@ func BindRoutes(s server.Server, r *mux.Router) {
 	r.HandleFunc("/posts/{id}", handler.UpdatePostHandler(s)).Methods(http.MethodPut)
 	r.HandleFunc("/posts/{id}", handler.DeletePostHandler(s)).Methods(http.MethodDelete)
 	r.HandleFunc("/posts", handler.ListPostsHandler(s)).Methods(http.MethodGet)
-	go hub.Run()
-	r.HandleFunc("/ws", hub.HandleWebsocket)
+	r.HandleFunc("/ws", s.Hub().HandleWebsocket)
 }

@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"sync"
@@ -81,4 +82,13 @@ func (hub *Hub) HandleWebsocket(w http.ResponseWriter, r *http.Request) {
 	hub.register <- client
 
 	go client.Write()
+}
+
+func (hub *Hub) Broadcast(message any, ignore *Client) {
+	data, _ := json.Marshal(message)
+	for _, client := range hub.clients {
+		if client != ignore {
+			client.outbound <- data
+		}
+	}
 }

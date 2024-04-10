@@ -10,6 +10,7 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/renpereiradx/go-avanzado-RestWebsocket/database"
 	"github.com/renpereiradx/go-avanzado-RestWebsocket/repository"
+	"github.com/renpereiradx/go-avanzado-RestWebsocket/websocket"
 )
 
 type Config struct {
@@ -20,15 +21,21 @@ type Config struct {
 
 type Server interface {
 	Config() *Config
+	Hub() *websocket.Hub
 }
 
 type Broker struct {
 	config *Config
 	router *mux.Router
+	hub    *websocket.Hub
 }
 
 func (b *Broker) Config() *Config {
 	return b.config
+}
+
+func (b *Broker) Hub() *websocket.Hub {
+	return b.hub
 }
 
 func NewServer(ctx context.Context, config *Config) (*Broker, error) {
@@ -44,6 +51,7 @@ func NewServer(ctx context.Context, config *Config) (*Broker, error) {
 	broker := &Broker{
 		config: config,
 		router: mux.NewRouter(),
+		hub:    websocket.NewHub(),
 	}
 	return broker, nil
 }
@@ -56,6 +64,7 @@ func (b *Broker) Start(binder func(s Server, r *mux.Router)) {
 		log.Println("error connecting to database", err)
 		return
 	}
+	go b.hub.Run()
 	repository.SetRepository(repo)
 
 	log.Println("starting on port ", b.config.Port)
