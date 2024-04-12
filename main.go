@@ -35,16 +35,17 @@ func main() {
 }
 
 func BindRoutes(s server.Server, r *mux.Router) {
-	middleware.CheckAuthMiddleware(s)
+	api := r.PathPrefix("/api/v1").Subrouter()
+	api.Use(middleware.CheckAuthMiddleware(s))
 
 	r.HandleFunc("/", handler.HomeHandler(s)).Methods(http.MethodGet)
 	r.HandleFunc("/signup", handler.SignUpHandler(s)).Methods(http.MethodPost)
 	r.HandleFunc("/login", handler.LoginHandler(s)).Methods(http.MethodPost)
-	r.HandleFunc("/me", handler.MeHandler(s)).Methods(http.MethodGet)
-	r.HandleFunc("/posts", handler.InsertPostHandler(s)).Methods(http.MethodPost)
+	api.HandleFunc("/me", handler.MeHandler(s)).Methods(http.MethodGet)
+	api.HandleFunc("/posts", handler.InsertPostHandler(s)).Methods(http.MethodPost)
 	r.HandleFunc("/posts/{id}", handler.GetPostByIDHandler(s)).Methods(http.MethodGet)
-	r.HandleFunc("/posts/{id}", handler.UpdatePostHandler(s)).Methods(http.MethodPut)
-	r.HandleFunc("/posts/{id}", handler.DeletePostHandler(s)).Methods(http.MethodDelete)
+	api.HandleFunc("/posts/{id}", handler.UpdatePostHandler(s)).Methods(http.MethodPut)
+	api.HandleFunc("/posts/{id}", handler.DeletePostHandler(s)).Methods(http.MethodDelete)
 	r.HandleFunc("/posts", handler.ListPostsHandler(s)).Methods(http.MethodGet)
 	r.HandleFunc("/ws", s.Hub().HandleWebsocket)
 }
