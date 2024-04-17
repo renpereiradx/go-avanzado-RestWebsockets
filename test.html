@@ -17,7 +17,7 @@
       console.log('Error: ' + event.data)
     }
 
-    fetch('http://localhost:5050/api/v1/posts', {
+    fetch('http://localhost:5050/posts', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -27,7 +27,6 @@
         return response.json()
       })
       .then(function (json) {
-        console.log('DATA RESPONSE')
         console.log(json)
       })
   </script>

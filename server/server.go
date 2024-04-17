@@ -61,7 +61,7 @@ func (b *Broker) Start(binder func(s Server, r *mux.Router)) {
 	b.router = mux.NewRouter()
 	binder(b, b.router)
 	// Add CORS support
-	handler := cors.Default().Handler(b.router)
+	handler := cors.AllowAll().Handler(b.router)
 	// Connect to database
 	repo, err := database.NewPostgresRepository(b.config.DatabaseUrl)
 	if err != nil {
